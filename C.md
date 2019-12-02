@@ -174,6 +174,8 @@
 
 ## 字符串和格式化输入/输出
 
+### 字符串
+
 ```c++
 #include <stdio.h>
 #include <string.h>
@@ -184,7 +186,7 @@ int main()
 {
     float weight,volume;
     int size_of,letters;
-    char name[40];
+    char name[40];  //最多输入39个字符，最后一个字符为字符串结束字符'\0'
     printf("hi! what`s your first name?\n");
     
     //%s：字符串的输入输出格式，scanf的第二个参数是一个地址引用，因为数组名本身就是一个引用，所以不用加&符号，在存储时，存入数组的字符的数量是字符串长度+1，最后一个为“\0”，表示字符串结束符，所以字符串的最大长度应是数组长度-1
@@ -196,6 +198,8 @@ int main()
     //strlen函数在string.h头文件中，用于返回字符串的长度而不是存储字符串的数组的长度
     letters = strlen(name);	
     volume = weight / DENSITY;
+    
+    //%s表示要打印一个字符串
     printf("well,%s,your volume is %2.2f cubic feet.\n",name,volume);
 
     printf("also,your first name has %d letters,\n",letters);
@@ -207,15 +211,86 @@ int main()
 }
 ```
 
-​		sizeof函数后面的圆括号的使用时机取决于运算对象是类型还是特定量，运算对象是类型时，圆括号必不可少，但对于特定量，可有可无。但就算如此，还是建议所有情况下都使用圆括号。
+​		sizeof ：以字节为单位返回变量的大小，函数后面的圆括号的使用时机取决于运算对象是类型还是特定量，运算对象是类型时，圆括号必不可少，但对于特定量，可有可无。但就算如此，还是建议所有情况下都使用圆括号。
+
+​		C语言没有专门用于存储字符串的变量类型，字符串都被存储在char类型的数组中。
+
+![](image/QQ截图20191202220504.png)
+
+​		末尾的字符'\0'，是空字符，C语言用它标记字符串的结束。
+
+​		**数组：同类型数据元素的有序序列。**
 
 
 
-​		**const关键字：限定变量为只读。**
+​		scanf("%s",name)：在读取输入时，会在读取的字符串最后自动加上'\0'。
+
+​		
+
+​	'x' 与 "x" 的区别：
+
+​			'x'：基本类型。
+
+​			"x"：字符数组类型，有两个字符 'x' 和 '\0' 两个字符组成。
+
+​	
+
+```c++
+#include <stdio.h>
+#include <string.h>
+
+#define  PARISE "You are an extraordinary being."
+
+int main()
+{
+    char name[40];
+
+    printf("What`s your name? ");
+    scanf("%s",name);
+
+    printf("Hello,%s. %s\n",name,PARISE);
+
+    printf("Your name of %zd letters occupies %zd memory cells.\n",strlen(name),sizeof(name));
+
+    printf("The phrase of praise has %zd letters ",strlen(PARISE));
+
+    printf("and occupies %zd memory cells.\n",sizeof(PARISE));
+
+    return 0;
+}
+```
+
+![](image/QQ截图20191202222805.png)
+
+![](image/QQ截图20191202222853.png)
+
+
+
+### 预编译（编译时替换）
+
+​		格式：#define  NAME  value
+
+​		**末尾没有分号，NAME 和 value中间也没有 = 符号**
+
+​		
+
+​		#define  PI  3.1415 ：编译时程序中所有的 PI 都会被替换成 3.1415。
+
+
+
+
+
+​		**const关键字：限定变量为只读。**一旦定义后，程序中可以打印，可以使用，但是不能修改。
+
+### 明示常量
 
 ![](image/QQ截图20190827085753.png)
 
 ![](image/QQ截图20190827085859.png)
+
+
+
+
 
 ### 转换说明
 
