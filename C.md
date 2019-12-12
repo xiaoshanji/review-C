@@ -410,3 +410,84 @@ scanf("%*d %*d %d",&n); //如果输入：55 32 20 ，最后 n 的值为20
 
 ​		递增运算符和递减运算符（--，++）：优先级仅次于括号。
 
+​		每一个表达式都有返回值，赋值表达式的值与赋值运算符左侧变量的值相同。
+
+### 类型转换：
+
+​		1、当类型转换出现在表达式中，无论是unsigned还是signed的char和short都会被自动转换成int。
+
+​		2、设计两种类型的运算，两个值会被分别转换成两种类型的更高级别。
+
+​		3、类型的级别从高到低：long  double，double，float，unsigned long，long long，unsigned long，long，unsigned int，int。short和char会被自动升级为int。
+
+​		4、在赋值表达式语句中，计算的最终结果会被转换成被赋值变量的类型，这个过程可能导致类型升级或降级。
+
+​		5、当作为函数传参数传递时，char和short会被转换成int，float被转换成double。
+
+​		待赋值的值与目标类型不匹配时：
+
+​				1、目标类型是无符号整型，且待赋的值是整数时，额外的位将被忽略。
+
+​				2、如果目标类型是一个有符号整型，且待赋的值是整数，结果因实现而异。
+
+​				3、如果目标类型是一个整型，且待赋的值是浮点数，该行为是未定义的。
+
+​		浮点数转为整数：直接舍弃小数部分。
+
+​		强制类型转换：在某个量的前面放置用圆括号括起来的类型名，该类型名即是希望转换成的目标类型，圆括号和它括起来的类型名构成了强制类型转换运算符。
+
+![](image/QQ截图20191212193552.png)
+
+```c++
+#include <stdio.h>
+
+const int S_PER_M = 60;
+const int S_PER_H = 3600;
+const double M_PER_K = 0.62137;
+
+int main()
+{
+    double distk,distm;
+    double rate;
+    int min,sec;
+    int time;
+    double mtime;
+    int mmin,msec;
+
+    printf("this program converts your time for a metric race\n");
+    printf("to a time for running a mile and to your average\n");
+    printf("speed in miles per hour.\n");
+
+    printf("Please enter,in milometers,the distance run.\n");
+
+    scanf("%lf",&distk);
+
+    printf("next enter the time in minutes and seconds.\n");
+
+    printf("begin by entering the minutes.\n");
+
+    scanf("%d",&min);
+    printf("now enter the seconds.\n");
+    scanf("%d",&sec);
+
+    time = S_PER_M * min + sec;
+    distm = M_PER_K * distk;
+
+    rate = distm / time * S_PER_H;
+
+    mtime = (double)time * distm;
+
+    mmin = (int)mtime / S_PER_M;
+
+    msec = (int)mtime % S_PER_M;
+
+    printf("you ran %1.2f km (%1.2f miles) in %d min,%d sec.\n",distk,distm,min,sec);
+
+    printf("that pace corresponds to running a mile in %d min, ",mmin);
+
+    printf("%d sec.\nyour average speed was %1.2f mph.\n",msec,rate);
+
+    return 0;
+}
+```
+
