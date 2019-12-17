@@ -598,3 +598,199 @@ int arr[20];
 */
 ```
 
+## 分支和跳转
+
+​		getchar()：从输入队列中返回下一个字符。
+
+​		putchar()：打印给它传递的字符参数。
+
+​		它们不要转换说明，只处理字符数据。
+
+​		ctype.h 头文件中包含一些专门处理字符的函数，这些函数接受一个字符作为参数，如果该字符属于某特殊的类别，就返回一个非零值；否则，返回0。
+
+![](image/QQ截图20191216205428.png)
+
+![](image/QQ截图20191216205502.png)
+
+​			字符映射函数不会修改原始的参数，这些函数只会返回已修改的值。
+
+```c++
+#include <stdio.h>
+#include <ctype.h>
+
+int main()
+{
+    char ch;
+
+    while((ch = getchar()) != '\n')
+    {
+        if(isalpha(ch))
+        {
+
+            putchar(ch + 1);
+        }
+        else
+        {
+
+            putchar(ch);
+        }
+    }
+    putchar(ch);
+
+    return 0;
+}
+```
+
+​	
+
+​		if  else if：
+
+```c++
+#include <stdio.h>
+#define PATE1 0.13230
+#define PATE2 0.15040
+#define PATE3 0.30025
+#define PATE4 0.34025
+#define BREAK1 360.0
+#define BREAK2 468.0
+#define BREAK3 720.0
+#define BASE1 (PATE1 * BREAK1)
+#define BASE2 (BASE1 + (PATE2 * (BREAK2 - BREAK1)))
+#define BASE3 (BASE1 + BASE2 + (PATE3 * (BREAK3 - BREAK2)))
+int main()
+{
+    double kwh;
+    double bill;
+    printf("please enter the kwh used.\n");
+    scanf("%lf",&kwh);
+    if(kwh <= BREAK1)
+    {
+        bill = PATE1 * kwh;
+    }
+    else if(kwh <= BREAK2)
+    {
+        bill = BASE1 + (PATE2 * (kwh - BREAK1));
+    }
+    else if(kwh <= BREAK3)
+    {
+        bill = BASE2 + (PATE3 * (kwh - BREAK2));
+    }
+    else
+    {
+        bill = BASE3 + (PATE4 * (kwh - BREAK3));
+    }
+    printf("the charge for %.1f kwh is %1.2f.\n",kwh,bill);
+    return 0;
+}
+```
+
+​		如果没有花括号，else 与离它最近的 if 匹配，除非最近的 if 被花括号括起来。
+
+
+
+逻辑运算符
+
+![](image/QQ截图20191217204049.png)
+
+​		&&，||：双目运算符。
+
+​		!：单目运算符。
+
+
+
+​		test1 && test2：当  test1 与 test2 都为真时，test1 && test2 为真。并且，如果 test1 为假，则直接返回假，test2 并不会执行。
+
+​		test1 || test2：当  test1 与 test2 都为假时，test1 || test2 为假。并且，如果 test1 为真，则直接返回真，test2 并不会执行。
+
+​		!test：如果 test 为真，!test 为假；如果 test 为假，!test 为真。
+
+​		引入 iso646.h 头文件，可以用 and 替换 &&，or 替换 ||，not 替换 !。
+
+```c++
+#include <stdio.h>
+#include <iso646.h>
+#define end '.'
+
+int main()
+{
+    int count = 0;
+    char ch;
+    while((ch = getchar()) != end)
+    {
+        //if(ch != '"' && ch != '\'')
+        if(ch != '"' and ch != '\'')
+        {
+            count++;
+        }
+    }
+    printf("%d",count);
+    return 0;
+}
+
+/*
+	判断非空字符：引入 ctype.h 头文件，使用 isspace 函数，参数为一个字符类型的值。
+*/
+```
+
+
+
+​		三目运算符： test ? x : y
+
+​				如果 test 为真，则返回 x 的值，否则返回 y 的值。
+
+
+
+​		continue：跳过本次循环剩余的部分，开始下一轮循环。对于 while 和 do while 来说就是执行决定是否继续循环的条件表达式，对于 for 来说就是执行更新计数器的表达式，即表达式3。
+
+
+
+​		break：终止循环。即立即到循环后的语句继续执行。并且只会影响包含它的当前循环。
+
+
+
+​		switch：
+
+```c++
+switch(n)
+{
+ 	case x:
+		表达式;
+		break;
+	case x:
+		表达式;
+		break;
+	case x:
+		表达式;
+		break;
+    ...
+    //default 语句是可选的
+    default:
+        表达式;
+        break;
+}
+```
+
+​		先对 switch 后圆括号的表达式求值，然后扫描标签，即 case 后面的值，直到发现一个匹配的值为止，然后执行对应标签内的语句，遇到 break 就跳出 switch 模块。由此可以看出圆括号中的表达式的值应该是一个准确值，并且是一个整数类型的值，所以 case 后的标签也应是一个整数类型的值。如果没有匹配到对应的标签，此时：如果有 defautl，则执行 default 内的语句，如果没有则跳出 switch 模块。
+
+​		break 语句必不可少，如果没有 break 语句，则匹配到对应的标签后，执行完其对应的语句后，会继续执行紧挨其后的 case 中的语句，直到碰到 break 语句或者 switch 块末尾。并且匹配的顺序是先 case，再 default，就算 default 写在模块开头也是如此。
+
+
+
+​		goto：由两部分组成，goto 和标签名，表签名遵守命名规范。最好不要使用。
+
+```c++
+#include <stdio.h>
+int main()
+{
+    printf("first\n");
+    //程序会直接跳转到以 threed: 开头的语句继续执行
+    goto threed;
+    
+    printf("second\n");
+    
+    threed:printf("threed\n");
+    
+    return 0;
+}
+```
+
