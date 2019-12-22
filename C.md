@@ -863,3 +863,69 @@ int main()
 
 
 
+## 函数
+
+​		函数是完成特定任务的独立程序代码单元
+
+```c++
+#include <stdio.h>
+#define NAME "GIGATHINK,INC."
+#define ADDRESS "101 Megabuck Plaza"
+#define PLACE "Megapolis,CA 94904"
+#define WIDTH 40
+
+//函数原型：告诉编译器函数的类型
+void starbar();
+int starbar_n(int n);
+
+int main()
+{
+    //调用函数：在此处执行函数
+    starbar();
+    printf("%s\n",NAME);
+    printf("%s\n",ADDRESS);
+    printf("%s\n",PLACE);
+    starbar();
+
+    return 0;
+}
+
+//函数定义：明确指定函数要干什么
+//starbar：函数名；函数名后的括号内，指定调用函数时需要传递的参数个数及其对应的类型，其被称为形参，并且声明参数时，一个参数对应对应一个数据类型；没有参数时，圆括号不能省略
+//void：返回值类型，如果没有返回值:void，不能省略。有返回值，则是对应返回值的类型，并且，函数一定要执行 return 语句。
+void starbar()
+{
+    int count;
+    for(count = 0 ; count < WIDTH ; count++)
+    {
+        putchar('*');
+    }
+    putchar('\n');
+}
+int starbar_n(int n)
+{
+    int count;
+    for(count = 0 ; count < n ; count++)
+    {
+        putchar('*');
+    }
+    putchar('\n');
+    //用于将函数运算的结果，返回给调用函数，值的类型必须与定义函数时声明的类型一致，或者可以隐式转换
+    return 0;
+}
+
+```
+
+​		如果将函数定义放在调用的函数之前，那么就不需要函数原型。
+
+​		函数签名：由返回值，函数名以及参数列表组成。
+
+![](image/QQ截图20191222192119.png)	
+
+​		形式参数（形参）：函数定义的函数头中声明的变量。
+
+​		实际参数（实参）：函数调用时，圆括号中的表达式。
+
+
+
+​		递归：函数直接或者间接调用自己。每次递归调用时，函数中的局部变量都是私有的，即每次调用时的变量都是独立互不影响的。
