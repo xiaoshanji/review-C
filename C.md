@@ -929,3 +929,169 @@ int starbar_n(int n)
 
 
 ​		递归：函数直接或者间接调用自己。每次递归调用时，函数中的局部变量都是私有的，即每次调用时的变量都是独立互不影响的。
+
+
+
+### 多文件
+
+```c++
+#include <stdio.h>
+
+/*
+	<>：引用的是编译器的类库路径里面的头文件。
+	""：引用的是你程序目录的相对路径中的头文件。
+*/
+#include "test.h"
+int main()
+{
+    starbar();
+    printf("%s\n",NAME);
+    printf("%s\n",ADDRESS);
+    printf("%s\n",PLACE);
+    starbar();
+
+    return 0;
+}
+```
+
+```c++
+#ifndef TEST_H_INCLUDED
+#define TEST_H_INCLUDED
+
+#define NAME "GIGATHINK,INC."
+#define ADDRESS "101 Megabuck Plaza"
+#define PLACE "Megapolis,CA 94904"
+
+#define WIDTH 40
+
+
+
+#endif // TEST_H_INCLUDED
+void starbar_n(int n);
+void starbar();
+```
+
+```c++
+#include <stdio.h>
+#include <test.h>
+void starbar_n(int n)
+{
+    int count;
+    for(count = 0 ; count < n ; count++)
+    {
+        putchar('*');
+    }
+    putchar('\n');
+}
+
+void starbar()
+{
+    int count;
+    for(count = 0 ; count < WIDTH ; count++)
+    {
+        putchar('*');
+    }
+    putchar('\n');
+}
+```
+
+
+
+## 指针
+
+​		指针：用于存储变量的地址。即，值为内存地址的变量。
+
+
+
+​		scanf 函数的参数列表中，类型转换说明之后就是以地址作为参数。
+
+
+
+```c++
+/*
+	首先声明一个 int 类型的变量并赋初始值 100。
+	然后声明一个 int 类型的指针变量（int* ptr），然后将 变量 a 在内存中的地址赋值给 ptr。
+	
+	int* ptr：声明一个指向 int 类型变量的指针，即该指针只能指向 int 类型的变量。
+	&a：取出变量 a 在内存中的地址，通常为一个十六进制的数。
+		
+*/
+int a = 100;
+
+//此时 ptr 中存储就是 a 变量在内存中的地址，虽然是一个十六进制数，但是该变量并不能参与算术运算
+int* ptr = &a;
+```
+
+
+
+"&"：取出给定变量的存储地址。即 pooh 是变量名， &pooh 就是变量的地址。地址即变量在内存中的位置。"%p" 转换说明可以打印出给定变量的地址。
+
+
+
+​		"*"：
+
+​				1、当出现在变量之前时，作用是取出存储在指针变量中的值。
+
+​				2、如果出现在数据类型之后，作用是声明一个对应类型的指针变量。声明后，该变量就只能指向其声明		类型的变量的地址。
+
+
+
+```c++
+#include <stdio.h>
+
+int main()
+{
+    int a = 100;
+    // int* b：声明一个 int 类型的指针变量。
+    // &a：变量 a 的内存地址。
+    int* b = &a;
+    
+    //"%p"：打印变量的内存地址，通常是十六进制
+    printf("%d %p\n",a,&a);
+    
+    // "*b"：此时的作用是取出指针变量 b 指向的内存中存储的值，即 a 变量的值：100
+    printf("%d\n",*b);
+    return 0;
+}
+```
+
+
+
+```c++
+#include <stdio.h>
+int interchange(int a,int b);
+int interchanges(int* a,int* b);
+int main()
+{
+    int a= 3;
+    int b= 4;
+
+    interchange(a,b);
+    printf("%d\t%d\n",a,b);
+
+    interchanges(&a,&b);
+    printf("%d\t%d\n",a,b);
+
+    return 0;
+}
+//此时传入该函数的两个变量，与 main 函数中的变量是互相独立的，即在该函数中对参数做的所有操作，并不会对 main 函数中的实参起作用。
+int interchange(int a,int b)
+{
+    int temp = a;
+    a = b;
+    b = a;
+}
+
+//此时，由于参数为指针变量，即形参和实参指向的地址都是相同的，所以在该函数中对形参的内存中存储的值的修改与对 main 函数中的实参起作用。
+int interchanges(int* a,int* b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+```
+
+![](image/QQ截图20191224203952.png)
+
+![](image/QQ截图20191224210400.png)
+
