@@ -1216,3 +1216,197 @@ dates + 2 == &dates[2];   //相同的地址
 *dates + 2 //相当于 (*dates) + 2，即取出数组第一个元素的值，再加 2
 ```
 
+
+
+
+
+```c++
+#include <stdio.h>
+int data[2] = {100,200};
+int moredata[2] = {300,400};
+int main()
+{
+    int *p1, *p2, *p3;
+
+    p1 = p2 = data;
+    p3 = moredata;
+    printf("  *p1 = %d,   *p2 = %d,    *p3 = %d\n",*p1,*p2,*p3);
+    printf("*p1++ = %d, *++p2 = %d,(*p3)++ = %d\n",*p1++,*++p2,(*p3)++);
+    printf("  *p1 = %d,   *p2 = %d,    *p3 = %d\n",*p1,*p2,*p3);
+    return 0;
+}
+```
+
+![](image/QQ截图20191227203043.png)
+
+
+
+
+
+```c++
+#include <stdio.h>
+#define SIZE 10
+int sump(int *start,int *end)
+{
+    int total = 0;
+    while(start < end)
+    {
+        total += *start;
+        // 如果 start 被声明为 int [] ，那么此表达式不可用
+        start++;
+    }
+    return total;
+}
+
+int main()
+{
+    int marbles[SIZE] = {20,10,5,39,4,16,19,26,31,20};
+    long answer;
+    // 此时 end 指向的位置是数组最后一个元素的后面，C 保证在给数组分配空间时，指向数组后面的第一个位置的指针仍是有效的指针。
+    answer = sump(marbles,marbles + SIZE);
+    printf("the total number of marbles is %ld.\n",answer);
+    return 0;
+}
+```
+
+​		
+
+​		由于将数组传递给函数时，传递的是指向数组的指针，由于通过该指针可以修改原始数组的值，所以如果函数的并不修改原始数组的值，那么为了防止出现错误的操作，可以在函数的形参前加上 const 来保证，函数运行期间原始数组的值不变。
+
+```c++
+#include <stdio.h>
+#define SIZE 10
+
+// 此时，如果函数修改原数组的值，会报错。但此时，并不意味着原数组不可变
+int sump(const int *start,int *end)
+{
+    int total = 0;
+    while(start < end)
+    {
+        total += *start;
+        start++;
+    }
+    return total;
+}
+
+int main()
+{
+    int marbles[SIZE] = {20,10,5,39,4,16,19,26,31,20};
+    long answer;
+    answer = sump(marbles,marbles + SIZE);
+    printf("the total number of marbles is %ld.\n",answer);
+    return 0;
+}
+```
+
+​		被 const 修饰，意味着，该变量只能被初始化一次。并且在声明时就要被初始化。
+
+```c++
+#include <stdio.h>
+#define SIZE 10
+int main()
+{
+    int arr[SIZE] = {1,2,3,4,5,6,7,8,9,10};
+    const int *point_arr = arr;
+    
+    // 因为 const 修饰，所以该操作不被允许
+    (*point_arr)++;
+    printf("%d",*point_arr);
+    
+    // 原数组没有被 const 修饰，允许该操作
+    arr[0]++;
+    printf("%d",arr[0]);
+    return 0;
+}
+```
+
+​		上面的实例表示，如果原数组没有被 const 修饰，而有一个指针被 const 修饰并指向该数组，那么通过该指针不能修改数组的值（并不是不能修改指针的值，point_arr++，即将指针向后移动至下一个元素起始地址，该操作，还是被允许的），但是通过数组名还是能修改数组中的值。
+
+
+
+​		指针赋值和 const 的规则：
+
+​				1、把 const 数据或非 const 数据的地址初始化为指向 const 的指针或为其赋值是合法的。
+
+​				2、只能把非 const 数据的地址赋值给普通指针。
+
+​		不能把 const 数组名作为实参传递给无 const 修饰的指针形参，其如果修改 const 中的数据，结果是未定义的。
+
+
+
+```c++
+#include <stdio.h>
+#define SIZE 10
+int main()
+{
+    int arr[SIZE] = {1,2,3,4,5,6,7,8,9,10};
+		
+    // 此时，通过指针不能修改指向的地址中的值，但指针指向的地址可以改变。即指针可以指向别处
+    const int * point_1 = arr;
+    
+    // 此时，通过指针能修改指向的地址中的值，但指针指向的地址不能改变，即指针不能指向别处。
+    int * const point_2 = arr;
+    
+    // 此时，通过指针不能修改指向的地址中的值，指针也不能指向别处。
+    const int * const point_3 = arr;
+
+    return 0;
+}
+```
+
+
+
+### 指针与二维数组的关系
+
+```c++
+	int arr[4][2];
+```
+
+​					1、因为 arr 是数组首元素的地址，所以 arr 和 &arr[0] 的值相同，而 arr[0] 本身是一个内含两个整数			的数组，所以，arr[0] 和它的首元素的地址（即 &arr[0] [0] 的值）相同，简而言之，arr[0] 是一个占用一			个 int 大小对象的地址，而 arr 是一个占用两个 int 大小对象的地址。
+
+​					2、给指针或地址加1，其值会增加对应类型大小的数值，由于 arr 与 arr[0] 所指向的对象占用的空间			不同，所以 arr + 1 与 arr[0] + 1 的值不同。
+
+​					3、在指针前使用 * 运算符，或者数组名后使用带下标的 [] 运算符，得到引用对象代表的值。因为 			arr[0] 是数组的首元素的地址（arr[0] [0]），所以 *(arr[0]) 表示存储在 arr[0] [0] 上的值。而 *arr 代表的			是数组 arr[0] 的值，而 arr[0] 本身也是一个地址，所以 *arr 相当于 &arr[0] [0] ，所以如果想通过数组名			获取二维数组中第一个元素的值要使用 **arr。即 arr 是地址的地址，要获取值必须要使用两次 * 运算符。
+
+```c++
+#include <stdio.h>
+int main()
+{
+    int arr[4][2] = {{2,4},{6,8},{1,3},{5,7}};
+    printf("arr = %p\t\tarr + 1 = %p\n",arr,arr + 1);
+    printf("arr[0] = %p\tarr[0] + 1 = %p\n",arr[0],arr[0] + 1);
+    printf("*arr = %p\t\t*arr+1 = %p\n",*arr,*arr + 1);
+    printf("\narr[0][0] = %d\n",arr[0][0]);
+    printf("*arr[0] = %d\n",*arr[0]);
+    printf("**arr = %d\n",**arr);
+    printf("arr[2][1] = %d\n",arr[2][1]);
+    printf("*(*(arr + 2) + 1) = %d\n",*(*(arr + 2) + 1));
+
+    return 0;
+}
+```
+
+![](image/QQ截图20200101170102.png)
+
+```c++
+int (*point)[2];
+int *point[2];
+
+// 上面两个声明，由于 [] 的优先级比 * 高，所以：
+// 	第一句：point 指向一个内含两个 int 类型值得数组.
+// 	第二句：point 是一个内含两个指针元素的数组，即数组的每个元素都是一个指针
+```
+
+![](image/QQ截图20200101174749.png)
+
+​		
+
+​		变长数组：
+
+​				在老的 C 语言版本中，数组的长度必须明确指定，即不能用变量来表示数组的长度。
+
+```c++
+int size = 10;
+int arr[size];    // 老的C语言版本中，不允许该操作。在 C99 标准之后，该操作被允许。
+```
+
