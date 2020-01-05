@@ -1410,3 +1410,76 @@ int size = 10;
 int arr[size];    // 老的C语言版本中，不允许该操作。在 C99 标准之后，该操作被允许。
 ```
 
+
+
+## 字符串和字符串函数
+
+​		字符串是以空字符（\0）结束的 char 类型数组。
+
+```c++
+#include <stdio.h>
+#define MSG "i am a symbolic string constant."
+#define MAXLENGTH 81
+int main()
+{
+    // 双引号括起来的内容被称为字符串字面量（字符串常量），当用此种形式定义字符串时，数组的元素个数至少要比字符串长度多 1 （为了容纳空字符），所有未被使用的元素都被自动初始化为 '\0'。如果并不确定数组大小，可以省略声明时中括号中的值，编译器会自动将大小定为字符串长度加 1 。但此种方法只适用于初始化数组时。
+    char words[MAXLENGTH] = "i am a string in an array.";
+    
+    // 用双引号括起来的内容被视为指向该字符串存储位置的指针，此种方式声明时，字符串的值是不可以改变的。就算去掉 const 也是一样。
+    const char * pt1 = "something is pointing at me.";
+    
+    // 显示字符串，并在末尾自动加上换行符
+    puts("here are some strings:");
+    
+    puts(MSG);
+    puts(words);
+    puts(pt1);
+    words[8] = 'p';
+    puts(words);
+
+    return 0;
+}
+```
+
+![](image/QQ截图20200105130343.png)
+
+### 		字符串输入
+
+​						gets：读取整行输入，知道遇到换行符，然后丢弃换行符，存储其余字符。但是其存在缓存溢出的				问题，后来就用 fgets 来替代它。
+
+​						fgets：功能与 gets 一样，但是其通过第二个参数来限制读入的字符数来解决溢出的问题。所以该函				数也专门用于处理文件输入。
+
+​								第 2 个参数指明了读入字符的最大数量，如果该参数的值为 n ，那么 fgets 将读取 n-1 个字						符，或者读到遇到的第一个换行符为止。
+
+​								如果 fgets 读到一个换行符，会把它存储在字符串中，而 gets 会丢弃换行符。
+
+​								fgets 函数的第三个参数指明要读取的文件，如果读入从键盘输入的数据，则以 stdin 作为参数
+
+​						因为 fgets 函数把换行符敷在字符串的末尾，通常要与 fputs函数配合使用
+
+​						fputs：通常与 fgets 配合使用，其第二个参数知名它要写入的文件，如果打印到显示器上，使用 				stdout 作为该参数。此时不会在字符串末尾追加换行符。
+
+```c++
+#include <stdio.h>
+#define STLEN 14
+int main()
+{
+    char words[STLEN];
+    puts("enter a string,please.");
+    fgets(words,STLEN,stdin);
+    printf("your string twice (puts(), then fputs()):\n");
+    puts(words);
+    fputs(words,stdout);
+    puts("enter another string,please.");
+    fgets(words,STLEN,stdin);
+    printf("your string twoce (put(),then fputs()):\n");
+    puts(words);
+    fputs(words,stdout);
+    puts("done.");
+
+    return 0;
+}
+```
+
+​		fputs：返回指向 char 的指针，如果一切进行顺利，该函数返回的地址与传入的第一个参数相同。大事故，如果函数读到文件末尾，它将返回一个特殊的指针：空指针。该指针保证不会指向有效的数据，所以可用于标识这种特殊情况。
+
