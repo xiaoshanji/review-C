@@ -1565,3 +1565,42 @@ int main()
 
 
 ​		sprintf：与 printf 类似，但是其作用是将数据写入字符串，而不是打印到显示器上，因此该函数可以把多个元素组合成一个字符串。第一个参数是目标字符串的地址，其余的参数和 printf 相同，即格式化字符串和待写入项的列表。
+
+### 命令行参数
+
+```c++
+// first.cpp
+#include <stdio.h>
+int main(int argc,int * argv[])
+{
+    int count ;
+    printf("the command line has %d arguments:\n",argc - 1);
+    for(count = 1 ; count < argc ; count++)
+    {
+        printf("%d:\t%s\n",count,argv[count]);
+    }
+    return 0;
+}
+```
+
+![](image/QQ截图20200107163421.png)
+
+​		C 编译器允许 main 没有参数或者有两个参数。当有两个参数时，第一个参数是命令行中字符串数量。程序将命令行字符串存储在内存中，并把每个字符串的地址存储在指针数组中，而该数组的地址则被存储在第二个参数中。
+
+
+
+​		atoi（需引入 stdlib 头文件）：用于将数值字符串转换为相应的整数值。如果字符串是以数值开头，其中却包含没数值字符，那么该函数只返回开头的数值字符所对应的整数。如果不是数值字符或者不以数值字符开头那么将返回 0 。
+
+​		atof：将其数值字符串转换为 double 类型的值。
+
+​		atol：将其数值字符串转换为 long 类型的值。
+
+
+
+​		相对于上面的三种， ANSI C还提供了一套更智能的函数，这些函数能识别和报告字符串中的首字符是否为数字。
+
+​				strtol：将字符串转为 long 类型的值。
+
+​				strtoul：将字符串转为 unsigned long 类型的值。其和 strtol 还可指定数字的进制。
+
+​				strtod：将字符串转换成 double 类型的值。
