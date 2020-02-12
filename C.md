@@ -1823,3 +1823,274 @@ int main()
 ​		restrict：允许编译器优化某部分代码以更高地支持计算。它只能用于指针，表明该指针是访问数据对象的唯一且初始的方式。
 
 ​		
+
+## 文件
+
+​		文件通常是在磁盘或固态硬盘上的一段已命名的存储区。C 把文件看作是一系列连续的字节，每个字节都能被单独读取。
+
+​		两种文件模式：
+
+​				1、文本模式，此模式中，程序所见的内容和文件的实际内容不同。程序以文本模式读取文件时，把本地环境表示的行末尾或文件结尾映射为C 模式。
+
+​				2、二进制模式，此模式中，程序可以访问文件的每个字节。
+
+​		所有文件的内容都是以二进制形式存储。但是，如果文件最初使用二进制编码的字符表示文本，该文件就是文本文件，其中包含文本内容。
+
+​		如果文件中的二进制值代表机器语言代码或数值数据或图片或音乐编码，那么该文件就是二进制文件，其中包含二进制内容。
+
+```c++
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int ch;
+    FILE *fp; //文件指针
+    unsigned long count = 0;
+    char * name = "E:\\test.txt";
+    //gets(name);
+    if((fp = fopen(name,"r")) == NULL)
+    {
+        printf("can`t open %s\n",name);
+        exit(EXIT_FAILURE);   //结束程序，正常结束传递0，异常结束传递非零值。
+    }
+    while((ch = getc(fp)) != EOF)   // 当使用getc读取一个字符时，如果是读取到文件末尾，将会返回EOF
+    {
+        putc(ch,stdout);
+        count++;
+    }
+    fclose(fp);
+    printf("\nfile %s has %lu characters\n",name,count);
+
+    return 0;
+}
+```
+
+
+
+​		fopen：打开文件。第一个参数是待打开文件的名称，更确切地说是一个包含该文件名的字符串地址，第二个参数是一个字符串，指定待打开文件的模式。
+
+![](image/QQ截图20200206143658.png)
+
+​		
+
+​		如果使用任何一种 "w" 模式（不带 x 字母）打开一个现有文件，该文件的内容会被删除，以便程序在一个空白文件中开始操作。然而，如果使用带 x 字母的任何一种模式，将无法打开一个现有文件。
+
+​		程序成功打开文件后，fopen 将返回文件指针，其他 I/O 函数可以使用这个指针指定该文件。
+
+​		文件指针的类型是执行 FILE 的指针，其定义在 stdio.h 中。文件指针并不指向实际的文件，它指向一个包含文件信息的数据对象，其中包含操作文件的 I/O 函数所用的缓冲区信息。
+
+
+
+​		fclose：关闭指定的文件，传入一个文件指针，必要时刷新缓冲区。如果关闭成功，返回 0，否则返回 EOF 。
+
+
+
+​		fseek：在 fopen 打开的文件中直接移动到任意字节处。第一个参数是 FILE 指针，指向待查找的文件，fopen 应该已打开该文件。第二个参数是偏移量，该参数表示从起始点开始要移动的距离。该参数必须是一个 long 类型的值，正负都可。第三个参数是模式，该参数确定起始点。成功返回 0，否则返回 -1。
+
+![](image/QQ截图20200209154215.png)
+
+
+
+​		ftell：返回一个 long 类型的值，表示文件中的当前位置。此定义适用于二进制模式打开的文件。
+
+### 标准I/O原理
+
+​		使用标准 I/O 的第一步是调用 fopen 打开文件。fopen 函数不仅打开一个文件，还创建一个缓冲区（读写模式创建两个）以及一个包含文件和缓冲区数据的结构，另外，fopen 返回一个指向该结构的指针，以便其他函数知道如何找到该结构。
+
+​		这个结构通常包含一个指定流中当前位置的文件位置指示器，除此之外，它还包含错误和文件结尾的指示器、一个指向缓冲区开始处的指针、一个文件标识符和一个计数（统计实际拷贝进缓冲区的字节数）。
+
+​		第二步是调用输入（输出）函数。一调用这些函数，文件中的数据块就被拷贝进缓冲区。最初调用函数，除了填充缓冲区外，还要设置文件指针所指向的结构中的值。尤其是要设置流中当前位置和拷贝进缓冲区的字节数。通常，当前位置从字节 0 开始。
+
+​		在初始化结构和缓冲区后，输入函数按要求从缓冲区中读取数据，在它读取数据时，文件位置指示器被设置为指向刚读取字符的下一个字符。由于 stdio.h 系列的所有输入（输出）函数都使用相同的缓冲区，所以用任何一个函数都将从上一次函数停止调用的位置开始。
+
+​		当函数发现已读完缓冲区的所有字符时，会请求把下一个缓冲大小的数据块从文件拷贝到缓冲区中，以这种方式，函数可以读取文件中的所有内容，知道文件结尾。函数在读取缓冲区中的最后一个字符后，把结尾指示器设置为真，于是，下一个被调用的输入函数将返回 EOF。
+
+​		
+
+​	ungetc：把 C 指定的字符放回输入流中，如果把一个字符放回输入流，下次调用标准输入函数时将读取该字符。
+
+![](image/QQ截图20200209161253.png)
+
+​		fflush：调用此函数引起输出缓冲区中所有的未写入数据都被发送到文件指针指定的输出文件，这个过程称为刷新缓冲区。如果文件指针为空，所有输出缓冲区都被刷新，在输入流中使用此函数的效果是未定义的。
+
+​		
+
+​		setvbuf：创建一个供标准 I/O 函数替换使用的缓冲区。在打开文件后且未对流进行其他操作之前，调用该函数，其第三个参数还可指定缓冲策略。有完全缓冲（在缓冲区满是刷新），行缓冲（在缓冲区满时或写入一个换行符时）、无缓冲。
+
+
+
+​		fwrite：将二进制数据写入文件，第一个参数为待写入数据块的地址，第二个参数是待写入数据块的大小，第三个参数是待写入数据块的数量，第四个参数值待写入的文件指针。返回成功写入项的数量。
+
+​		
+
+​		fread：参数类型和数量与 fwrite 相同，用于读取被 fwrite 写入文件的数据。返回成功读取项的数量。
+
+​		
+
+​		feof、ferror：当上一个输入调用检测到文件结束时，feof 函数返回非零值，否则返回 0。当读或写出现错误，ferror 返回一个非零值，否则返回 0。
+
+
+
+​		
+
+## 结构
+
+​		结构声明描述了一个结构的组织布局。
+
+```c++
+struct book
+{
+	char title[41];
+	char author[51];
+	float value;
+};
+```
+
+![](image/QQ截图20200212151829.png)
+
+​		该声明描述了一个由两个字符数组和一个 float 类型变量组成的结构，该声明并未创建实际的数据对象，只描述了该对象由什么组成。用一对花括号括起来的是结构成员列表，每个成员都用自己的生命来描述。成员可以是任意一种 C 的数据类型，甚至可以是其他的结构。右花括号后面的分号是必须的，表示结构布局定义结束
+
+​		struct：关键字，声明跟在其后的是一个结构，后面是一个结构名（可选项）。
+
+![](image/QQ截图20200212151949.png)
+
+​		结构名：如果如上图定义结构后紧跟变量名，并且不会重用此结构名，那么可以不要结构名，如果需要重用结构，那么就必须要结构名。
+
+
+
+​		初始化：
+
+```c++
+struct book libery ={
+		"xxx",
+		"ssss",
+		23.0
+	};
+
+//或者使用初始化器，此时可以不按定义时的顺序进行初始化
+struct book libery ={
+		.title = "xxx",
+		.author = "ssss",
+		.value = 23.0
+	};
+```
+
+​		如上，可以使用在一对花括号括起的初始化列表进行初始化，各初始化项目逗号分隔。
+
+​		访问结构成员：使用结构成员运算符（.）访问结构中的成员。
+
+### 结构数组
+
+```c++
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define MAXTITL 40
+#define MAXAUTL 40
+#define MAXBKS 100
+
+char* s_gets(char* st, int n);
+
+struct book
+{
+	char title[41];
+	char author[51];
+	float value;
+};
+
+
+int main()
+{
+	struct  book library[MAXBKS]; //声明结构数组
+	int count = 0;
+	int index;
+	printf("please enter the book title.\n");
+	printf("press [enter] at the start of a line to stop.\n");
+	while (count < MAXBKS && s_gets(library[count].title,MAXTITL) != NULL && library[count].title[0] != '\0')
+	{
+		printf("now enter the author.\n");
+		s_gets(library[count].author, MAXAUTL);
+		printf("now enter the value.\n");
+		scanf("%f",&library[count].value);
+		while (getchar() != '\n')
+		{
+			continue;
+		}
+		count++;
+		if (count < MAXBKS)
+		{
+			printf("enter the next title.\n");
+		}
+	}
+	if (count > 0)
+	{
+		printf("here is the list of your books:\n");
+		for (index = 0; index < count; index++)
+		{
+			printf("%s by %s : $%.2f\n",library[index].title,library[index].author,library[index].value);
+		}
+	}
+	else
+	{
+		printf("no books?too bad.\n");
+	}
+	return 0;
+}
+
+
+char* s_gets(char* st, int n)
+{
+	char* ret_val;
+	char* find;
+	ret_val = fgets(st, n, stdin);
+	if (ret_val)
+	{
+		find = strchr(st, '\n');
+		if (find)
+		{
+			*find = '\0';
+		}
+		else
+		{
+			while (getchar() != '\n')
+			{
+				continue;
+			}
+		}
+	}
+	return ret_val;
+}
+```
+
+![](image/QQ截图20200212162433.png)
+
+```c++
+int main()
+{
+	struct  book library[2] = {
+		{
+			"xxx",
+			"zzz",
+			23.0
+		},
+		{
+			"yyy",
+			"aaa",
+			24.0
+		}
+	};
+	struct book* point;
+	point = library;
+    // point->title 等同于 (*point).title，不能写point.title，因为point不是结构变量，而且用后一种写法时，圆括号必须可少，因为 . 的优先级大于 *
+	printf("%s\n",point->title);
+	point++;
+	printf("%s", point->title);
+	
+	return 0;
+}
+```
+
+
+
