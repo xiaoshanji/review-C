@@ -2094,3 +2094,608 @@ int main()
 
 
 
+​		将结构保存到文件中
+
+```c++
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#define MAXTITL 40
+#define MAXAUTL 40
+#define MAXBKS 10
+char* s_gets(char* st, int n);
+struct book {
+	char title[MAXTITL];
+	char author[MAXAUTL];
+	float value;
+};
+
+int main()
+{
+	struct book library[MAXBKS];
+	int count = 0;
+	int index, filecount;
+	FILE* pbooks;
+	int size = sizeof(struct book);
+	if ((pbooks = fopen("book.bat", "a+b")) == NULL)
+	{
+		fputs("can`t open book.bat file\n",stderr);
+		exit(1);
+	}
+
+	rewind(pbooks);  // 将文件指针置于文件开始处
+
+	while (count < MAXBKS && fread(&library[count],size,1,pbooks) == 1)
+	{
+		if (count == 0)
+		{
+			puts("current contents of book.bat:");
+		}
+		printf("%s by %s : $%.2f\n",library[count].title,library[count].author,library[count].value);
+		count++;
+	}
+	filecount = count;
+	if (count == MAXBKS)
+	{
+		fputs("the book.bat file is full",stderr);
+		exit(2);
+	}
+
+	puts("please add new book titles.");
+	puts("press enter at the start of a line to stop.");
+	while (count < MAXBKS && s_gets(library[count].title,MAXTITL) !=NULL && library[count].title[0] != '\0')
+	{
+		puts("now enter the author.");
+		s_gets(library[count].author,MAXAUTL);
+		puts("now enter the value.");
+		scanf("%f",&library[count++].value);
+		while (getchar() != '\n')
+		{
+			continue;
+		}
+		if (count < MAXBKS)
+		{
+			puts("enter the next title.");
+		}
+	}
+	if (count > 0)
+	{
+		puts("here is the list of your books:");
+		for (index = 0 ;index < count;index++)
+		{
+			printf("%s by %s : $%.2f\n",library[index].title,library[index].author,library[index].value);
+		}
+		fwrite(&library[filecount], size, count - filecount, pbooks);
+	}
+	else
+	{
+		puts("no books? too bad.\n");
+	}
+	fclose(pbooks);
+
+	return 0;
+}
+
+char* s_gets(char* st, int n)
+{
+	char* ret_val;
+	char* find;
+	ret_val = fgets(st,n,stdin);
+	if (ret_val)
+	{
+		find = strchr(st,'\n');
+		if (find)
+		{
+			*find = '\0';
+		}
+		else
+		{
+			while (getchar() != '\n')
+			{
+				continue;
+			}
+		}
+	}
+	return ret_val;
+}
+```
+
+
+
+## 联合
+
+​		联合是一种数据类型，它能在同一个内存空间中存储不同的数据类型（不是同时存储）。
+
+```c++
+union hold
+{
+	int digit;
+	double bigfl;
+	char letter;
+};
+```
+
+​		以上的声明的联合只能存储一个 int 类型的值或一个 double 类型的值或 char 类型的值。
+
+​		初始化联合：
+
+```c++
+	union hold valA;
+	// 直接初始化联合中的成员
+	valA.letter = 'R';
+	
+	// 将一个联合初始化为另一个同类型的联合
+	union hold valB = valA;
+
+	// 初始化联合的第一个元素
+	union hold valC = {88};
+
+	// C99标准：使用指定初始化器
+	union hold valD = {.letter = 'R'};
+```
+
+​		访问联合中的值与访问结构的成员一样，但不同的是，联合一次只能存储一种类型的值。
+
+
+
+## 枚举
+
+​		可以用枚举类型声明符号名称来表示整型常量，使用 enum 关键字，实际上，enum 常量是 int 类型，因此，只要能使用 int 类型的地方就可以使用枚举类型。枚举类型的目的是提高程序的可读性，它的语法与结构的语法相同。
+
+```c++
+enum spectrum
+{
+	red,
+	orange,
+	yellow,
+	green,
+	blue,
+	violet
+};
+```
+
+​		经过上面的声明， red 就成为一个有名称的常量，代表整数 0，orange 代表 2，以此类推。
+
+​		声明时，也可以为枚举常量指定整数值：
+
+```c++
+enum levels
+{
+	low = 100,
+	medium = 500,
+	high = 2000
+};
+```
+
+​		如果只给其中的某一些枚举常量赋值，那么后面的常量会被赋予后续的值。
+
+```c++
+enum spectrum
+{
+	red,                // 0
+	orange = 10,		// 10
+	yellow,				// 11
+	green = 100,		// 100
+	blue,				// 101
+	violet				// 102
+};
+```
+
+​		因为枚举类型是整数类型，所以可以在表达式中以使用整数变量的方式使用 enum 变量。·
+
+```c++
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+char* s_gets(char* st, int n)
+{
+	char* ret_val;
+	char* find;
+	ret_val = fgets(st, n, stdin);
+	if (ret_val)
+	{
+		find = strchr(st, '\n');
+		if (find)
+		{
+			*find = '\0';
+		}
+		else
+		{
+			while (getchar() != '\n')
+			{
+				continue;
+			}
+		}
+	}
+	return ret_val;
+}
+
+enum spectrum
+{
+	red,
+	orange,
+	yellow,
+	green,
+	blue,
+	violet
+};
+
+const char* colors[] = {"red","orange","yellow","green","blue","violet"};
+
+#define LEN 30
+
+int main()
+{
+	char choice[LEN];
+	enum spectrum color;
+	bool color_is_found = false;
+
+	puts("enter a color (empty line to quit):");
+	while (s_gets(choice,LEN) != NULL && choice[0] != '\0')
+	{
+		for (color = red;color <= violet ; color++)
+		{
+			if (strcmp(choice,colors[color]) != 0)
+			{
+				color_is_found = true;
+				break;
+			}
+		}
+
+		if (color_is_found)
+		{
+			switch (color)
+			{
+			case red:
+				puts("roses are red.");
+				break;
+			case orange:
+				puts("roses are orange.");
+				break;
+			case yellow:
+				puts("roses are yellow.");
+				break;
+			case green:
+				puts("roses are green.");
+				break;
+			case blue:
+				puts("roses are blue.");
+				break;
+			case violet:
+				puts("roses are violet.");
+				break;
+			default:
+				break;
+			}
+		}
+		else
+		{
+			printf("i don`t know about the color %s.\n",choice);
+		}
+		color_is_found = false;
+		puts("next color,please (empty line to quit):");
+	}
+	puts("done");
+	return 0;
+}
+```
+
+
+
+​	C 语言使用名称空间标识程序中的各部分，即通过名称来识别。作用域是名称空间概念的一部分：两个不同作用域的同名变量不冲突；两个相同作用域的同名变量冲突。名称空间是份类别的。在特定作用域中的结构标记、联合标记和枚举标记是共享相同的名称空间，该名称空间与普通变量使用的空间不同。这意味着在相同作用域中变量和标记的名称可以相同。不会引起冲突，但是不能在相同作用域中声明两个同名标签或同名变量。
+
+
+
+​		typedef 可以为某一类型自定义名称，与 #define 类似，但有3处不同：
+
+​				1、与 #define 不同，typedef 创建的符号名只受限于类型，不能用于值。
+
+​				2、typedef 有编译器解释，不是预处理器。
+
+​				3、在其受限范围内，typedef 比 #define 更灵活。
+
+​		比较复杂的声明：
+
+![](image/Snipaste_2020-02-17_15-39-17.png)
+
+​		规则：
+
+​				1、数组名后面的 [] 和函数名后面的 () 具有相同的优先级。它们比 * 的优先级高。
+
+​				2、[] 和 () 的优先级相同，都是从左往右结合。
+
+## 函数指针
+
+​		函数也有地址，因为函数的机器语言实现由载入内存的代码组成，指向函数的指针中存储着函数代码的起始处的地址。
+
+​		声明一个函数指针时，必须声明指针指向的函数类型，为了指明函数类型，要指明函数签名，即函数的返回类型和形参类型。
+
+```c++
+void ToUpper(char* st);     //函数原型
+void (*pf)(char*);			//指向函数的指针
+
+ // 使用
+char arr[] = "afd";
+ToUpper(arr);
+pf(arr);                  	// 两种方法都行，此时 pf 与 ToUpper等价，因为函数名也代表函数的首地址
+   
+```
+
+​		实例：
+
+```c++
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define LEN 81
+
+char* s_gets(char* st, int n);
+char showmenu();
+void eatline();
+void show(void (*fp)(char*), char* str);
+void ToUpper(char*);
+void ToLower(char*);
+void Transpose(char*);
+void Dummy(char*);
+
+int main()
+{
+	char line[LEN];
+	char copy[LEN];
+	char chioce;
+	void (*pfun)(char*);
+	puts("enter a string (empty line to quit):");
+	while (s_gets(line,LEN) != NULL && line[0] != '\0')
+	{
+		while ((chioce = showmenu()) != 'n')
+		{
+			switch (chioce)
+			{
+			case 'u':
+					pfun = ToUpper;
+					break;
+			case 'l':
+				pfun = ToLower;
+				break;
+			case 't':
+				pfun = Transpose;
+				break;
+			case 'o':
+				pfun = Dummy;
+				break;
+			default:
+				pfun = Dummy;
+				break;
+			}
+			strcpy(copy, line);
+			show(pfun,copy);
+		}
+		puts("enter a string (empty line to quit):");
+	}
+	puts("done");
+
+	return 0;
+}
+char showmenu()
+{
+	char ans;
+	puts("enter menu chioce:");
+	puts("u) uppercase\t\tl) lowercase");
+	puts("t) transposed case\t\to) original case");
+	puts("n) next string");
+	ans = getchar();
+	ans = tolower(ans);
+
+	eatline();
+
+	while (strchr("ulton",ans) == NULL)
+	{
+		puts("please enter a u, l, t, o, or n:");
+		ans = tolower(getchar());
+		eatline();
+	}
+	return ans;
+}
+
+void eatline()
+{
+	while (getchar() != '\n')
+	{
+		continue;
+	}
+}
+
+void ToUpper(char* str)
+{
+	while (*str)
+	{
+		*str = toupper(*str);
+		str++;
+	}
+}
+
+void ToLower(char* str)
+{
+	while (*str)
+	{
+		*str = tolower(*str);
+		str++;
+	}
+}
+
+void Transpose(char* str)
+{
+	while (*str)
+	{
+		if (islower(*str))
+		{
+			*str = toupper(*str);
+		}
+		else if (isupper(*str))
+		{
+			*str = tolower(*str);
+		}
+		str++;
+	}
+}
+
+void Dummy(char* str)
+{
+
+}
+void show(void (*fp)(char*), char* str)
+{
+	(*fp)(str);
+	puts(str);
+}
+
+char* s_gets(char* st, int n)
+{
+	char* ret_val;
+	char* find;
+	ret_val = fgets(st, n, stdin);
+	if (ret_val)
+	{
+		find = strchr(st, '\n');
+		if (find)
+		{
+			*find = '\0';
+		}
+		else
+		{
+			while (getchar() != '\n')
+			{
+				continue;
+			}
+		}
+	}
+	return ret_val;
+}
+```
+
+![](image/Snipaste_2020-02-17_16-28-09.png)
+
+
+
+
+
+## 位操作
+
+​		C 语言用字节表示储存系统字符集所需的大小，一个字节通常有 8 个二进制位。每个二进制位可以表示 0 和 1 两种状态。
+
+![](image/QQ截图20200219113933.png)
+
+​		编号为 7 的位被称为高阶位，编号为 0 的位被称为低阶位。每 1 位的编号对应 2 的相应指数。将所有位都设置为 1 ，换成十进制：255，将所有位设置为 0 ，换成十进制： 0。所以一个字节可存储 0 ~ 255，共 256 个数。
+
+
+
+### 表示整数
+
+​		如何表示有符号整数，一种方法是拿出高阶位作为符号位， 0 表示正数，1 表示负数。但此种方法会出现 +0 和 -0 的混淆。
+
+​		第二种：**二进制补码**：表示正数时与第一种方法相同，表示负数时，例如 -128。
+
+​				用一个 9 位组合 100000000（256 的二进制形式）减去这个负数的位组合（10000000），结果是该负		值的二进制补码。（10000000）。
+
+​				还有一种方法表示负数：先用二进制补码表示该负数对应的正数，然后将二进制补码按位取反，然后再		加 1。例如：-128：128 的二进制补码表示为 10000000，按位取反后为 00000001，然后加 1 为：				10000000。按位取反后得到的量称为反码，所以此种方法也可表示为：负数的二进制补码等于该负数对应的正数的反码加 1 。
+
+
+
+### 表示浮点数
+
+​		浮点数分为两部分储存：二进制小数和二进制指数。（有点复杂看下面给出的博客）
+
+https://blog.csdn.net/zyzmzm_/article/details/89008707
+
+
+
+### 八进制
+
+​		C 语言中用 0 为前缀表示八进制数（0 ~ 7），**八进制数的每一位对应三个二进制位**，所以八进制数0377，用二进制表示为 11111111（原本是 011111111，放在最前面的 0 可以省略），0173 二进制表示为 1111011。
+
+![](image/QQ截图20200219123829.png)
+
+
+
+### 十六进制
+
+​		C 语言中用 0x 为前缀表示十六进制数（A ~ F 表示 10 ~ 15，不区分大小写），**十六进制数的每一位对应四个二进制位**，
+
+![](image/QQ截图20200219124116.png)
+
+### 位运算符
+
+#### 按位取反： **~**
+
+​		~ ：将二进制码中的 1 变成 0，0 变成 1。因为，取绝对值运算可以表示为：
+
+```c++
+int sub(int n)
+{
+	return n >= 0 ? n : ~n + 1;
+}
+```
+
+#### 按位与：&
+
+​		&：两个运算对象相应的二进制为 1 ，结果才 1，否则结果为 0（也可以从真/假方面来看，两个为都为真时，结果才为真）。按位与和赋值结合的运算符： &=。
+
+
+
+#### 按位或：|
+
+​		|：两个运算对象相应的二进制只要有一个为 1 ，结果就为 1，从真/假方面来看，只要有一方为真，结果就为真。按位或和赋值结合的运算符： |=。
+
+
+
+#### 按位异或：^
+
+​		^：两个运算对象相应的二进制位不同为 1，相同为 0。按位异或和赋值结合的运算符： ^=。
+
+
+
+### 移位运算符
+
+#### 左移：<<
+
+​		<<：将其左侧运算对象的二进制码每一位的值都向左移动其右侧对象指定的位数。左侧运算对象移出左末端位的值丢弃，用 0 填充空出的位置。在不丢失的情况下，左移多小位，相当于乘以 2 的多少次方。左移赋值运算符：<<=。
+
+
+
+#### 右移：>>
+
+​		>>：将其左侧运算对象的二进制码每一位的值都向左移动其右侧对象指定的位数，左侧运算对象移出右末端位的值丢弃，对于无符号类型，用 0 填充空出的位置，对于有符号类型，视机器而定。右移多少位，相当于除以 2 的多少次方，右移赋值运算符：>>=。
+
+
+
+​		用二进制表示整数：
+
+```c++
+void itobs(int n)
+{
+	int i;
+	const static int size = CHAR_BIT * sizeof(int);
+	char arr[size];
+
+	for (i = size - 1 ; i >= 0;i--,n >>= 1)
+	{
+		arr[i] = (01 & n) + '0';
+	}
+	for (i = 0 ; i < size ; i++)
+	{
+		if (i % 4 == 0)
+		{
+			putchar(' ');
+		}
+		putchar(arr[i]);
+	}
+}
+```
+
+
+
+
+
