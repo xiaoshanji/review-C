@@ -2699,3 +2699,193 @@ void itobs(int n)
 
 
 
+### 位字段
+
+​		位字段是一个 signed int 或 unsiged int 类型变量中的一组相邻的位。位字段通过一个结构声明来建立，该结构声明位每个字段提供标签，并确定该字段的宽度。
+
+```c++
+struct {
+	unsigned int autfd : 1;
+	unsigned int bldfc : 1;
+	unsigned int undln : 1;
+	unsigned int itals : 1;
+} prnt;
+```
+
+​		以上声明，prnt 包含 4 个 1 位的字段（1 个二进制位）。可以通过访问结构成员的方式访问这些字段。由于每个字段恰好为 1 位，所以只能为其赋值 1 或 0，该变量占 int 大小的内存单元。
+
+​		如果声明的总数超过一个 unsigned int 类型，此时会用到下一个 unsigned int 类型的存储位置。一个字段不允许跨越两个 unsigned int 之间的便捷。编译器会自动移动跨界的字段，保持 unsigned int的边界对齐。
+
+
+
+## C预处理器和C库
+
+​		C预处理器在程序执行之前查看程序。根据程序中的预处理器指令，预处理把符号所谓替换成其表示的内容。预处理器可以包含程序所需的其他文件，可选择让编译器查看哪些代码。
+
+​		预处理之前，编译器必须对该程序进行一些翻译处理。
+
+​				首先：编译器把源代码中出现的字符映射到源字符集。该过程处理多字节字符和三字符序列
+
+​				第二：编译器定位每个反斜杠后面跟着换行符的实例，并删除它们。（此处的换行符是指：在源代码文		件中敲下回车换行生成的字符）。
+
+​				第三：编译器把文本划分成预处理记号序列、空白序列和注释序列（记号是由空格、制表符和换行符分		隔得项）。此时，编译器将用一个空格字符替换每一条注释。
+
+​				最后，程序已经准备好进入预处理阶段，预处理器查找一行中以 # 号开始的预处理指令。
+
+### #define
+
+​		#define ：定义明示常量（也叫符号常量）。
+
+```c++
+#include <stdio.h>
+#define TWO 2
+#define OW "consistency is the last refuge of the unimagina \
+tive. - Oscar Wilde"  /* 根据上面的处理规则，此处的两个物理行会被处理为一个逻辑行*/
+
+#define FOUR TWO * TWO
+#define PX printf("X is %d.\n",x)
+#define FMT "X is %d.\n"
+
+int main()
+{
+	int x = TWO;
+	PX;
+	x = FOUR;
+	printf(FMT,x);
+	printf("%s\n",OW);
+	printf("TWO:OW\n");
+	return 0;
+}
+```
+
+​		每行 #define 由三部分组成。第一部分是 #define 指令本身，第二部分是选定的缩写，也称为**宏**，宏的名称中不能有空格，只能使用字符、数字和下划线字符，而且首字符不能是数字。第三部分称为替换列表或替换体。一旦预处理器在程序中找到宏的示实例后，就会用替换体替换该宏。从宏变成最终替换文本的过程称为宏展开。
+
+![](image/QQ截图20200223154241.png)
+
+​		由于编译器在编译器对所有的常量表达式（只包含常量的表达式）求值，所以与处理器不会进行实际的乘法运算，这一过程在编译时进行。预处理器不做计算，不对表达式求值，它只进行替换。
+
+​		一般而言，预处理器发现程序中的宏后，会用宏等价的替换文本进行替换。如果替换的字符串中还包含宏，则继续替换这些宏，唯一例外的是双引号中的宏。
+
+​		在 #define 中使用参数可以创建外形和作用与函数类似的**类函数宏**，带有参数的宏看上去很像函数，因为这样的宏也使用圆括号，类函数宏定义的圆括号中可以有一个或多个参数，随后这些参数出现在替换体中。
+
+![](image/QQ截图20200223162517.png)
+
+​		此处的坑是：**使用类函数宏时，仅仅是替换而不会进行计算，所以是先替换然后再根据优先级计算。**
+
+```c++
+#include<stdio.h>
+#define SQUARE(X) X*X
+#define PR(X) printf("the result is %d.\n",X)
+
+int main()
+{
+	int x = 5;
+	int z;
+	printf("x = %d\n",x);
+	z = SQUARE(x);
+	printf("evaluating SQUARE(X):");
+	PR(z);
+	z = SQUARE(2);
+	printf("evaluating SQUARE(2):");
+	PR(z);
+	printf("evaluating SQUARE( x + 2):");
+	PR(SQUARE(x + 2));   //  x + 2 * x + 2
+	printf("evaluating 100 / SQUARE(2):");
+	PR(100 / SQUARE(2));  // 100 / 2 * 2 
+	printf("x is %d.\n",x);
+	printf("evaluating AQUARE(++x):"); 
+	PR(SQUARE(++x));  // ++x * ++x
+	printf("after incrementing ,x is %x.\n",x);
+	return 0;
+}
+```
+
+
+
+​		C 允许在字符串中包含宏参数，在类函数宏的替换体中， # 号作为一个预处理运算符，可以把记号转为成字符串。如果 x 是一个宏形参，那么 #x 就是转换为字符串 x 的形参名。这个过程称为字符串化。
+
+​		##：该运算符可用于类函数宏的替换部分，而且，## 还可用于对象宏的替换部分。把两个记号组合成一个记号。
+
+![](image/QQ截图20200223164733.png)
+
+### #include
+
+​		当预处理器发现 #include 指令时，会查看后面的文件名并把文件的内容包含到当前文件中，即替换源文件中的 #include 指令。这相当于把被包含文件的全部内容输入到源文件 #include 指令所在的位置。
+
+​		两种形式：
+
+```c++
+#include<stdio.h>
+#include"second,h"
+```
+
+​		尖括号告诉预处理器在标准系统目录中查找该文件，双引号告诉预处理器首先在当前目录中查找该文件，如果未找到再查找标准系统目录。
+
+
+
+### #underf
+
+​		#underf指令用于 “取消” 已定义的 #define 指令。
+
+
+
+### 条件编译
+
+​		可以使用指令创建条件编译，告诉编译器根据编译时的条件执行或忽略信息块。
+
+```c++
+#ifdef MAVIS
+	#include "horse.h"   // 如果已经用 #define 定义了 MAVIS，则执行此处的命令
+	#define STABLES 5
+#else
+	#include "cow.h"	// 如果没有用 #define 定义了 MAVIS，则执行此处的命令
+	#define STABLES 15
+#endif // MAVIS
+```
+
+
+
+​		#ifndef：该指令与 #ifdef 指令的用法类似，也可以和 #else、#endif 一起使用，但是逻辑与 #ifdef 相反，用于判断后面的标识符是否是未定义的。
+
+
+
+​		#if：该指令后面跟整型常量表达式，如果表达式为非零，则表达式为真。可以在指令中使用 C 的关系运算符和逻辑运算符。并且可以按照 if else 的形式使用 #elif。
+
+
+
+​		#pragma：将编译器指令放入源代码中。
+
+
+
+### 泛型
+
+​		泛型变成指哪些没有特定类型，但是一旦指定一种类型，就可以转换成指定类型的代码。
+
+​		泛型表达式：可以根据表达式的类型选择一个值。该表达式不是预处理器指令。
+
+![](image/QQ截图20200223174758.png)
+
+```c++
+#include<stdio.h>
+#define STYLETYPE(X) _Generic((X),\
+	int : "int",\
+	float : "float",\
+	double : "double",\
+	default : "other"\
+)
+int main()
+{
+	int d = 5;
+	printf("%s\n", STYLETYPE(d));
+	printf("%s\n", STYLETYPE(2.0 * d));
+	printf("%s\n", STYLETYPE(3L));
+	printf("%s\n", STYLETYPE(&d));
+	return 0;
+}
+```
+
+
+
+​		line：函数说明符，表明该函数为内联函数，内联函数的定义通常情况应与调用放在同一源文件中，也可以将内联函数的定义放在头文件中，调用时，只需包含头文件。
+
+​		_Noreturn：函数说明符，修饰函数时表明调用完成后函数不返回主调函数。exit() 函数就是该说明符的一个示例。
